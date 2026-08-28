@@ -1,10 +1,16 @@
-﻿import uuid
+import os
+import uuid
 
 import requests
 import streamlit as st
 
 st.set_page_config(page_title="企业智能知识库", page_icon="📚", layout="wide")
-API_BASE_URL = st.sidebar.text_input("API 地址", st.session_state.get("api_base_url", "http://localhost:8000"))
+default_api_url = os.getenv("API_BASE_URL", "http://localhost:8000")
+current_api_url = st.session_state.get("api_base_url", default_api_url)
+# Inside Docker, localhost points to the Streamlit container; use the API service hostname.
+if current_api_url in {"http://localhost:8000", "http://127.0.0.1:8000"} and default_api_url != "http://localhost:8000":
+    current_api_url = default_api_url
+API_BASE_URL = st.sidebar.text_input("API 地址", current_api_url)
 st.session_state["api_base_url"] = API_BASE_URL.rstrip("/")
 
 
