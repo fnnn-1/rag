@@ -193,3 +193,30 @@ POST /api/v1/knowledge-bases/{knowledge_base_id}/search
 ```
 
 未配置真实 Embedding API 时，系统会使用 `hash-fallback` 保证本地开发和测试可运行；配置 `LLM_API_KEY` 和 `EMBEDDING_MODEL` 后自动切换为 `openai-compatible`。
+## 第五天状态
+
+已完成完整 RAG 问答链路：
+
+- 会话、消息和引用数据模型
+- Prompt 模板和严格知识库问答规则
+- LLM OpenAI-compatible 调用
+- 无 API Key 时的抽取式离线回答 fallback
+- 基于词项/字符重叠和检索得分的重排序
+- 证据门控和无依据拒答
+- 回答引用文档分块来源
+- 检索、生成和 Trace ID 调试信息
+- Streamlit 问答界面和引用展开
+
+问答接口：
+
+```text
+POST /api/v1/chat/query
+```
+
+当没有足够证据时，接口返回 `grounded=false`，并固定回复：
+
+```text
+知识库中未找到足够依据，无法准确回答该问题。
+```
+
+配置 `LLM_API_KEY` 和 `LLM_MODEL` 后使用云端模型；未配置时使用 `extractive-fallback`，保证本地演示不依赖外部模型。

@@ -1,3 +1,6 @@
-﻿from app.db.base import Base, Document, DocumentChunk, IngestionJob, KnowledgeBase, User
+from app.db.base import Base, Conversation, Document, DocumentChunk, IngestionJob, KnowledgeBase, Message, MessageCitation, User
 
-__all__ = ["Base", "Document", "DocumentChunk", "IngestionJob", "KnowledgeBase", "User"]
+__all__ = [
+    "Base", "Conversation", "Document", "DocumentChunk", "IngestionJob",
+    "KnowledgeBase", "Message", "MessageCitation", "User",
+]

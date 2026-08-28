@@ -1,8 +1,17 @@
-﻿from sqlalchemy import text
+from sqlalchemy import text
 
 from app.db.base import Base
 from app.db.session import engine
-from app.models import Document, IngestionJob, KnowledgeBase, User  # noqa: F401
+from app.models import (
+    Conversation,
+    Document,
+    DocumentChunk,
+    IngestionJob,
+    KnowledgeBase,
+    Message,
+    MessageCitation,
+    User,
+)  # noqa: F401
 
 
 async def init_db() -> None:

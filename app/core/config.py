@@ -1,4 +1,4 @@
-﻿from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     embedding_dimensions: int = 1536
     embedding_batch_size: int = 32
     embedding_timeout_seconds: float = 30.0
+    llm_timeout_seconds: float = 60.0
     retrieval_candidate_k: int = 20
     rrf_k: int = 60
 

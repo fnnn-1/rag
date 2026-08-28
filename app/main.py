@@ -1,8 +1,9 @@
-﻿from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
 from app.api.auth import router as auth_router
+from app.api.chat import router as chat_router
 from app.api.documents import router as documents_router
 from app.api.health import router as health_router
 from app.api.knowledge_bases import router as knowledge_base_router
@@ -26,6 +27,7 @@ app = FastAPI(
 
 app.include_router(health_router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")
+app.include_router(chat_router, prefix="/api/v1")
 app.include_router(knowledge_base_router, prefix="/api/v1")
 app.include_router(documents_router, prefix="/api/v1")
 app.include_router(search_router, prefix="/api/v1")
