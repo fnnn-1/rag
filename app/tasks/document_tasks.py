@@ -2,10 +2,11 @@
 import asyncio
 from pathlib import Path
 
-from sqlalchemy import select
+from sqlalchemy import delete, func, select, update
 
 from app.db.session import SessionLocal
-from app.models import Document, IngestionJob
+from app.llm.embeddings import get_embedding_provider
+from app.models import Document, DocumentChunk, IngestionJob
 from app.parsers.document_parser import parse_document
 from app.tasks.celery_app import celery_app
 
@@ -17,16 +18,38 @@ async def _process_document(document_id: str, job_id: str) -> dict:
         if document is None or job is None:
             raise ValueError("文档或处理任务不存在")
 
-        now = datetime.now(timezone.utc)
         document.status = "processing"
         job.status = "processing"
-        job.started_at = now
+        job.started_at = datetime.now(timezone.utc)
         await session.commit()
 
         try:
             parsed = parse_document(Path(document.storage_path))
             if not parsed.text or not parsed.chunks:
                 raise ValueError("文档未解析出有效文本")
+
+            provider = get_embedding_provider()
+            embeddings = await provider.embed_documents(parsed.chunks)
+            if len(embeddings) != len(parsed.chunks):
+                raise ValueError("Embedding 返回数量与文档分块数量不一致")
+            if any(len(vector) != len(embeddings[0]) for vector in embeddings):
+                raise ValueError("Embedding 向量维度不一致")
+
+            await session.execute(delete(DocumentChunk).where(DocumentChunk.document_id == document.id))
+            for index, (content, embedding) in enumerate(zip(parsed.chunks, embeddings, strict=True)):
+                session.add(DocumentChunk(
+                    document_id=document.id,
+                    chunk_index=index,
+                    content=content,
+                    token_count=len(content),
+                    embedding=embedding,
+                ))
+            await session.flush()
+            await session.execute(
+                update(DocumentChunk)
+                .where(DocumentChunk.document_id == document.id)
+                .values(search_vector=func.to_tsvector("simple", DocumentChunk.content))
+            )
 
             document.extracted_text = parsed.text
             document.chunk_count = len(parsed.chunks)
@@ -37,7 +60,12 @@ async def _process_document(document_id: str, job_id: str) -> dict:
             job.error_message = None
             job.finished_at = datetime.now(timezone.utc)
             await session.commit()
-            return {"document_id": str(document.id), "chunk_count": document.chunk_count, "status": "completed"}
+            return {
+                "document_id": str(document.id),
+                "chunk_count": document.chunk_count,
+                "embedding_provider": provider.name,
+                "status": "completed",
+            }
         except Exception as exc:
             document.status = "failed"
             document.error_message = str(exc)[:2000]

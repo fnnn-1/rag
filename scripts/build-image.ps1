@@ -11,7 +11,7 @@ try {
         $createdMapping = $true
     }
 
-    docker build --tag kb-app:day3 "$drive\"
+    docker build --tag kb-app:day4 "$drive\"
     if ($LASTEXITCODE -ne 0) {
         throw "Docker image build failed with exit code $LASTEXITCODE"
     }

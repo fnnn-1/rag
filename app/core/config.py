@@ -1,6 +1,4 @@
-﻿from pathlib import Path
-
-from pydantic_settings import BaseSettings, SettingsConfigDict
+﻿from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -28,6 +26,11 @@ class Settings(BaseSettings):
     llm_api_key: str = ""
     llm_model: str = ""
     embedding_model: str = ""
+    embedding_dimensions: int = 1536
+    embedding_batch_size: int = 32
+    embedding_timeout_seconds: float = 30.0
+    retrieval_candidate_k: int = 20
+    rrf_k: int = 60
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -51,7 +54,8 @@ class Settings(BaseSettings):
     def max_upload_size_bytes(self) -> int:
         return self.max_upload_size_mb * 1024 * 1024
 
-    def ensure_upload_dir(self) -> Path:
+    def ensure_upload_dir(self):
+        from pathlib import Path
         path = Path(self.upload_dir)
         path.mkdir(parents=True, exist_ok=True)
         return path

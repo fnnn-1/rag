@@ -33,7 +33,7 @@ services:
       retries: 10
 
   api:
-    image: kb-app:day3
+    image: kb-app:day4
     container_name: kb-api
     restart: unless-stopped
     env_file:
@@ -55,7 +55,7 @@ services:
         condition: service_healthy
 
   worker:
-    image: kb-app:day3
+    image: kb-app:day4
     container_name: kb-worker
     restart: unless-stopped
     env_file:
@@ -75,7 +75,7 @@ services:
         condition: service_healthy
 
   frontend:
-    image: kb-app:day3
+    image: kb-app:day4
     container_name: kb-frontend
     restart: unless-stopped
     env_file:

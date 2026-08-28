@@ -134,4 +134,43 @@ async def test_document_upload_validation(client: AsyncClient) -> None:
         files={"file": ("empty.txt", b"", "text/plain")},
     )
     assert empty.status_code == 400
+@pytest.mark.asyncio
+async def test_hybrid_search_returns_indexed_chunks(client: AsyncClient) -> None:
+    token = await register_and_login(client)
+    headers = {"Authorization": f"Bearer {token}"}
+    created = await client.post(
+        "/api/v1/knowledge-bases",
+        headers=headers,
+        json={"name": "第四天检索测试"},
+    )
+    assert created.status_code == 201, created.text
+    knowledge_base_id = created.json()["id"]
+
+    response = await client.post(
+        f"/api/v1/knowledge-bases/{knowledge_base_id}/documents",
+        headers=headers,
+        files={
+            "file": (
+                "expense-policy.txt",
+                "Expense reimbursement policy: transportation and hotel costs require valid receipts.".encode("utf-8"),
+                "text/plain",
+            )
+        },
+    )
+    assert response.status_code == 202, response.text
+    document = await wait_for_document(client, response.json()["document"]["id"], token)
+    assert document["status"] == "completed", document
+
+    search = await client.post(
+        f"/api/v1/knowledge-bases/{knowledge_base_id}/search",
+        headers=headers,
+        json={"query": "hotel costs receipts", "top_k": 5},
+    )
+    assert search.status_code == 200, search.text
+    body = search.json()
+    assert body["embedding_provider"] in {"hash-fallback", "openai-compatible"}
+    assert body["result_count"] >= 1
+    assert body["results"][0]["document_name"] == "expense-policy.txt"
+    assert body["results"][0]["vector_score"] is not None
+    assert body["results"][0]["hybrid_score"] > 0
 

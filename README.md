@@ -161,3 +161,35 @@ docs/      架构和项目文档
 - `.env` 只用于本地配置，不提交 API Key。
 - 生产环境必须修改 `SECRET_KEY` 和数据库密码。
 - 示例资料应使用自拟或已脱敏的内容。
+
+## 第四天状态
+
+已完成向量化和混合检索基础能力：
+
+- `document_chunks` 分块表
+- Embedding Provider 适配层
+- OpenAI-compatible Embedding API 支持
+- 无 API Key 时的离线 Hash Embedding fallback
+- pgvector 余弦相似度检索
+- PostgreSQL `tsvector` 全文检索
+- RRF 混合排序
+- HNSW 向量索引和 GIN 全文索引
+- 知识库级数据过滤
+- 检索结果包含文档来源、分块内容和多个得分
+
+检索接口：
+
+```text
+POST /api/v1/knowledge-bases/{knowledge_base_id}/search
+```
+
+请求示例：
+
+```json
+{
+  "query": "hotel costs receipts",
+  "top_k": 5
+}
+```
+
+未配置真实 Embedding API 时，系统会使用 `hash-fallback` 保证本地开发和测试可运行；配置 `LLM_API_KEY` 和 `EMBEDDING_MODEL` 后自动切换为 `openai-compatible`。
