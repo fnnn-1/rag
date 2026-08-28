@@ -33,3 +33,6 @@ build/
 
 # Docker
 .docker/
+
+# Local verification artifact
+openapi-day2.json

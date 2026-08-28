@@ -1,6 +1,18 @@
 ﻿# 企业级智能知识库问答系统
 
-面向企业内部员工的智能知识库问答系统，计划支持文档上传、异步解析、向量化、混合检索、RAG 问答、引用来源和基础用户权限。
+面向企业内部员工的智能知识库问答系统，支持用户认证、知识库管理，并将逐步加入文档上传、异步解析、向量化、混合检索、RAG 问答和引用来源。
+
+## 第二天状态
+
+已完成用户认证和知识库管理：
+
+- 用户注册、登录和 JWT 鉴权
+- 当前用户信息接口
+- 知识库创建、查询、更新和删除
+- 用户资源隔离
+- PostgreSQL 表自动初始化
+- Streamlit 登录和知识库管理页面
+- 认证与权限集成测试
 
 ## 第一天状态
 
@@ -53,6 +65,12 @@ docker compose ps
 docker compose down
 ```
 
+第二天集成测试（容器内执行）：
+
+```powershell
+docker exec -e RUN_DB_TESTS=1 kb-api pytest -q
+```
+
 ## 服务地址
 
 - API：http://localhost:8000
@@ -65,6 +83,19 @@ docker compose down
 ```powershell
 Invoke-WebRequest http://localhost:8000/health
 Invoke-WebRequest http://localhost:8000/api/v1/health
+```
+
+## 第二天新增接口
+
+```text
+POST   /api/v1/auth/register
+POST   /api/v1/auth/login
+GET    /api/v1/auth/me
+POST   /api/v1/knowledge-bases
+GET    /api/v1/knowledge-bases
+GET    /api/v1/knowledge-bases/{knowledge_base_id}
+PATCH  /api/v1/knowledge-bases/{knowledge_base_id}
+DELETE /api/v1/knowledge-bases/{knowledge_base_id}
 ```
 
 ## 项目结构

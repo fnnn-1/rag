@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Stop"
 
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $drive = "X:"
@@ -11,7 +11,7 @@ try {
         $createdMapping = $true
     }
 
-    docker build --tag kb-app:day1 "$drive\"
+    docker build --tag kb-app:day2 "$drive\"
     if ($LASTEXITCODE -ne 0) {
         throw "Docker image build failed with exit code $LASTEXITCODE"
     }

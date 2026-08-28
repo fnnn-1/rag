@@ -1,4 +1,4 @@
-﻿services:
+services:
   db:
     image: pgvector/pgvector:pg16
     container_name: kb-db
@@ -33,7 +33,7 @@
       retries: 10
 
   api:
-    image: kb-app:day1
+    image: kb-app:day2
     container_name: kb-api
     restart: unless-stopped
     env_file:
@@ -55,7 +55,7 @@
         condition: service_healthy
 
   worker:
-    image: kb-app:day1
+    image: kb-app:day2
     container_name: kb-worker
     restart: unless-stopped
     env_file:
@@ -75,7 +75,7 @@
         condition: service_healthy
 
   frontend:
-    image: kb-app:day1
+    image: kb-app:day2
     container_name: kb-frontend
     restart: unless-stopped
     env_file:
@@ -99,4 +99,3 @@ volumes:
     name: kb_uploads_data
   processed_data:
     name: kb_processed_data
-
