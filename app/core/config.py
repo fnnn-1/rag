@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     llm_api_key: str = ""
     llm_model: str = ""
     embedding_model: str = ""
+    embedding_api_key: str = ""
+    embedding_base_url: str = ""
     embedding_dimensions: int = 1536
     embedding_batch_size: int = 32
     embedding_timeout_seconds: float = 30.0

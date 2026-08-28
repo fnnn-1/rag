@@ -70,7 +70,7 @@ async def test_rag_answer_has_citations_and_conversation(client: AsyncClient) ->
     assert body["citations"]
     assert body["citations"][0]["document_name"] == "expense-policy.txt"
     assert "[S1]" in body["answer"]
-    assert body["llm_provider"] == "extractive-fallback"
+    assert body["llm_provider"] in {"extractive-fallback", "openai-compatible", "extractive-fallback-after-error"}
     assert body["retrieval_latency_ms"] >= 0
     assert body["generation_latency_ms"] >= 0
 

@@ -1,4 +1,4 @@
-﻿from hashlib import sha256
+from hashlib import sha256
 import math
 import re
 
@@ -48,8 +48,8 @@ class OpenAIEmbeddingProvider(EmbeddingProvider):
 
     def __init__(self):
         self.client = AsyncOpenAI(
-            api_key=settings.llm_api_key,
-            base_url=settings.llm_base_url or None,
+            api_key=settings.embedding_api_key,
+            base_url=settings.embedding_base_url or settings.llm_base_url or None,
             timeout=settings.embedding_timeout_seconds,
         )
 
@@ -64,6 +64,6 @@ class OpenAIEmbeddingProvider(EmbeddingProvider):
 
 
 def get_embedding_provider() -> EmbeddingProvider:
-    if settings.llm_api_key and settings.embedding_model:
+    if settings.embedding_api_key and settings.embedding_model:
         return OpenAIEmbeddingProvider()
     return HashEmbeddingProvider(settings.embedding_dimensions)

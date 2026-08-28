@@ -220,3 +220,19 @@ POST /api/v1/chat/query
 ```
 
 配置 `LLM_API_KEY` 和 `LLM_MODEL` 后使用云端模型；未配置时使用 `extractive-fallback`，保证本地演示不依赖外部模型。
+
+## 模型凭证配置
+
+对话模型和 Embedding 模型支持使用不同的 API 凭证：
+
+```env
+LLM_BASE_URL=对话模型接口地址
+LLM_API_KEY=对话模型API Key
+LLM_MODEL=对话模型名称
+
+EMBEDDING_BASE_URL=Embedding接口地址（与对话接口相同可留空）
+EMBEDDING_API_KEY=Embedding模型API Key
+EMBEDDING_MODEL=Embedding模型名称
+```
+
+`.env` 不得提交到仓库；配置后需要重启 `api` 和 `worker` 服务。
