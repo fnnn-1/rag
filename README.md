@@ -1,7 +1,43 @@
-﻿# 企业级智能知识库问答系统
+# 企业级智能知识库问答系统
 
 面向企业内部员工的智能知识库问答系统，支持用户认证、知识库管理，并将逐步加入文档上传、异步解析、向量化、混合检索、RAG 问答和引用来源。
 
+## 第三天状态
+
+已完成文档上传和异步处理：
+
+- 支持 PDF、DOCX、Markdown 和 TXT
+- 文件大小和扩展名校验
+- 本地上传文件持久化
+- Celery + Redis 后台异步处理
+- 文档解析、文本清洗和分块
+- 文档处理状态查询
+- 文档列表、详情和删除
+- 任务失败原因记录
+- 用户只能访问自己知识库中的文档
+- Streamlit 文档上传和状态展示
+
+第三天文档接口：
+
+```text
+POST   /api/v1/knowledge-bases/{knowledge_base_id}/documents
+GET    /api/v1/knowledge-bases/{knowledge_base_id}/documents
+GET    /api/v1/documents/{document_id}
+DELETE /api/v1/documents/{document_id}
+GET    /api/v1/jobs/{job_id}
+```
+
+支持的文件类型：
+
+```text
+.pdf
+.docx
+.md
+.markdown
+.txt
+```
+
+默认单文件大小限制：20 MB。
 ## 第二天状态
 
 已完成用户认证和知识库管理：
@@ -65,7 +101,7 @@ docker compose ps
 docker compose down
 ```
 
-第二天集成测试（容器内执行）：
+第二天和第三天集成测试（容器内执行）：
 
 ```powershell
 docker exec -e RUN_DB_TESTS=1 kb-api pytest -q
@@ -112,12 +148,13 @@ docs/      架构和项目文档
 ## 开发计划
 
 1. 用户认证和知识库管理
-2. PDF、Word、Markdown、TXT 文档处理
-3. Celery 异步入库
-4. Embedding 与 pgvector
-5. 全文检索、混合检索和重排序
-6. 严格基于资料的 RAG 问答
-7. 评测、测试和项目包装
+2. 文档上传和异步解析
+3. Embedding 与 pgvector
+4. 全文检索、混合检索和重排序
+5. 严格基于资料的 RAG 问答
+6. 评测、测试和项目包装
+
+
 
 ## 安全说明
 

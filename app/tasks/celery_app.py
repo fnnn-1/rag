@@ -14,6 +14,7 @@ celery_app.conf.update(
     accept_content=["json"],
     timezone="Asia/Shanghai",
     enable_utc=True,
+    include=["app.tasks.document_tasks"],
 )
 
 

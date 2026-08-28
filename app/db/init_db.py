@@ -2,7 +2,7 @@
 
 from app.db.base import Base
 from app.db.session import engine
-from app.models import KnowledgeBase, User  # noqa: F401
+from app.models import Document, IngestionJob, KnowledgeBase, User  # noqa: F401
 
 
 async def init_db() -> None:

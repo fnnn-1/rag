@@ -1,4 +1,6 @@
-﻿from pydantic_settings import BaseSettings, SettingsConfigDict
+﻿from pathlib import Path
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -18,6 +20,9 @@ class Settings(BaseSettings):
     redis_host: str = "redis"
     redis_port: int = 6379
     redis_db: int = 0
+
+    upload_dir: str = "/workspace/data/uploads"
+    max_upload_size_mb: int = 20
 
     llm_base_url: str = ""
     llm_api_key: str = ""
@@ -41,6 +46,15 @@ class Settings(BaseSettings):
     @property
     def redis_url(self) -> str:
         return f"redis://{self.redis_host}:{self.redis_port}/{self.redis_db}"
+
+    @property
+    def max_upload_size_bytes(self) -> int:
+        return self.max_upload_size_mb * 1024 * 1024
+
+    def ensure_upload_dir(self) -> Path:
+        path = Path(self.upload_dir)
+        path.mkdir(parents=True, exist_ok=True)
+        return path
 
 
 settings = Settings()

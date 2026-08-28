@@ -1,5 +1,5 @@
 import os
-import uuid
+import time
 
 import requests
 import streamlit as st
@@ -7,7 +7,7 @@ import streamlit as st
 st.set_page_config(page_title="企业智能知识库", page_icon="📚", layout="wide")
 default_api_url = os.getenv("API_BASE_URL", "http://localhost:8000")
 current_api_url = st.session_state.get("api_base_url", default_api_url)
-# Inside Docker, localhost points to the Streamlit container; use the API service hostname.
+# Streamlit 在 Docker 容器内运行时，通过 api 服务名访问 FastAPI。
 if current_api_url in {"http://localhost:8000", "http://127.0.0.1:8000"} and default_api_url != "http://localhost:8000":
     current_api_url = default_api_url
 API_BASE_URL = st.sidebar.text_input("API 地址", current_api_url)
@@ -20,7 +20,7 @@ def api_request(method: str, path: str, **kwargs):
     if token:
         headers["Authorization"] = f"Bearer {token}"
     try:
-        return requests.request(method, f"{API_BASE_URL.rstrip('/')}{path}", headers=headers, timeout=15, **kwargs)
+        return requests.request(method, f"{API_BASE_URL.rstrip('/')}{path}", headers=headers, timeout=30, **kwargs)
     except requests.RequestException as exc:
         st.error(f"无法连接 API：{exc}")
         return None
@@ -28,7 +28,7 @@ def api_request(method: str, path: str, **kwargs):
 
 def auth_panel() -> None:
     st.title("📚 企业级智能知识库问答系统")
-    st.caption("第二天版本：用户认证与知识库管理")
+    st.caption("第三天版本：用户认证、知识库管理和文档处理")
     mode = st.radio("操作", ["登录", "注册"], horizontal=True)
     with st.form("auth_form"):
         email = st.text_input("邮箱")
@@ -61,6 +61,50 @@ def auth_panel() -> None:
             st.rerun()
         elif response is not None:
             st.error(response.json().get("detail", "登录失败"))
+
+
+def render_documents(knowledge_base_id: str) -> None:
+    st.markdown("#### 文档管理")
+    uploaded_file = st.file_uploader(
+        "上传 PDF、Word、Markdown 或 TXT 文件",
+        type=["pdf", "docx", "md", "markdown", "txt"],
+        key=f"upload-{knowledge_base_id}",
+    )
+    if uploaded_file is not None and st.button("提交文档处理", key=f"submit-{knowledge_base_id}"):
+        response = api_request(
+            "POST",
+            f"/api/v1/knowledge-bases/{knowledge_base_id}/documents",
+            files={"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)},
+        )
+        if response is not None and response.status_code == 202:
+            st.success("文档已提交，后台正在处理")
+            st.rerun()
+        elif response is not None:
+            st.error(response.json().get("detail", "文档上传失败"))
+
+    response = api_request("GET", f"/api/v1/knowledge-bases/{knowledge_base_id}/documents")
+    if response is None or not response.ok:
+        return
+    documents = response.json()
+    if not documents:
+        st.info("该知识库还没有文档")
+        return
+
+    for document in documents:
+        status_map = {"queued": "排队中", "processing": "处理中", "completed": "已完成", "failed": "失败"}
+        status_text = status_map.get(document["status"], document["status"])
+        cols = st.columns([4, 2, 2, 1])
+        cols[0].write(f"**{document['original_filename']}**")
+        cols[1].write(f"状态：{status_text}")
+        cols[2].write(f"分块：{document['chunk_count']}")
+        if cols[3].button("删除", key=f"delete-doc-{document['id']}"):
+            delete_response = api_request("DELETE", f"/api/v1/documents/{document['id']}")
+            if delete_response is not None and delete_response.status_code == 204:
+                st.rerun()
+            elif delete_response is not None:
+                st.error(delete_response.json().get("detail", "删除失败"))
+        if document.get("error_message"):
+            st.caption(f"错误：{document['error_message']}")
 
 
 def knowledge_base_panel() -> None:
@@ -110,6 +154,7 @@ def knowledge_base_panel() -> None:
                     st.rerun()
                 elif delete_response is not None:
                     st.error(delete_response.json().get("detail", "删除失败"))
+            render_documents(item["id"])
 
 
 if st.session_state.get("access_token"):

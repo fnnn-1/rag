@@ -3,6 +3,7 @@
 from fastapi import FastAPI
 
 from app.api.auth import router as auth_router
+from app.api.documents import router as documents_router
 from app.api.health import router as health_router
 from app.api.knowledge_bases import router as knowledge_base_router
 from app.core.config import settings
@@ -25,6 +26,7 @@ app = FastAPI(
 app.include_router(health_router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(knowledge_base_router, prefix="/api/v1")
+app.include_router(documents_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["system"])
