@@ -1,0 +1,102 @@
+﻿services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: kb-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-knowledge_base}
+      POSTGRES_USER: ${POSTGRES_USER:-knowledge_base}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: kb-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    image: kb-app:day1
+    container_name: kb-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db
+      REDIS_HOST: redis
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/workspace
+      - uploads_data:/workspace/data/uploads
+      - processed_data:/workspace/data/processed
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    image: kb-app:day1
+    container_name: kb-worker
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db
+      REDIS_HOST: redis
+    command: celery -A app.tasks.celery_app.celery_app worker --loglevel=INFO --pool=solo
+    volumes:
+      - .:/workspace
+      - uploads_data:/workspace/data/uploads
+      - processed_data:/workspace/data/processed
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    image: kb-app:day1
+    container_name: kb-frontend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      API_BASE_URL: http://api:8000
+    command: streamlit run frontend/app.py --server.address=0.0.0.0 --server.port=8501
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/workspace
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+    name: kb_postgres_data
+  redis_data:
+    name: kb_redis_data
+  uploads_data:
+    name: kb_uploads_data
+  processed_data:
+    name: kb_processed_data
+

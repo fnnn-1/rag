@@ -1,0 +1,46 @@
+﻿from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    app_name: str = "knowledge-base-api"
+    app_version: str = "0.1.0"
+    app_env: str = "development"
+    debug: bool = True
+    secret_key: str = "change-me-in-env"
+    access_token_expire_minutes: int = 60
+
+    postgres_db: str = "knowledge_base"
+    postgres_user: str = "knowledge_base"
+    postgres_password: str = "change-me"
+    postgres_host: str = "db"
+    postgres_port: int = 5432
+
+    redis_host: str = "redis"
+    redis_port: int = 6379
+    redis_db: int = 0
+
+    llm_base_url: str = ""
+    llm_api_key: str = ""
+    llm_model: str = ""
+    embedding_model: str = ""
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
+
+    @property
+    def database_url(self) -> str:
+        return (
+            f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}"
+            f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
+        )
+
+    @property
+    def redis_url(self) -> str:
+        return f"redis://{self.redis_host}:{self.redis_port}/{self.redis_db}"
+
+
+settings = Settings()
