@@ -10,6 +10,9 @@ from app.core.config import settings
 class EmbeddingProvider:
     name = "base"
 
+    async def close(self) -> None:
+        return None
+
     async def embed_documents(self, texts: list[str]) -> list[list[float]]:
         raise NotImplementedError
 
@@ -19,8 +22,6 @@ class EmbeddingProvider:
 
 
 class HashEmbeddingProvider(EmbeddingProvider):
-    """Deterministic offline fallback for local development and tests."""
-
     name = "hash-fallback"
 
     def __init__(self, dimensions: int):
@@ -52,6 +53,9 @@ class OpenAIEmbeddingProvider(EmbeddingProvider):
             base_url=settings.embedding_base_url or settings.llm_base_url or None,
             timeout=settings.embedding_timeout_seconds,
         )
+
+    async def close(self) -> None:
+        await self.client.close()
 
     async def embed_documents(self, texts: list[str]) -> list[list[float]]:
         vectors: list[list[float]] = []

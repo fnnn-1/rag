@@ -1,4 +1,4 @@
-﻿from datetime import datetime, timezone
+from datetime import datetime, timezone
 import asyncio
 from pathlib import Path
 
@@ -29,7 +29,10 @@ async def _process_document(document_id: str, job_id: str) -> dict:
                 raise ValueError("文档未解析出有效文本")
 
             provider = get_embedding_provider()
-            embeddings = await provider.embed_documents(parsed.chunks)
+            try:
+                embeddings = await provider.embed_documents(parsed.chunks)
+            finally:
+                await provider.close()
             if len(embeddings) != len(parsed.chunks):
                 raise ValueError("Embedding 返回数量与文档分块数量不一致")
             if any(len(vector) != len(embeddings[0]) for vector in embeddings):
@@ -67,11 +70,17 @@ async def _process_document(document_id: str, job_id: str) -> dict:
                 "status": "completed",
             }
         except Exception as exc:
-            document.status = "failed"
-            document.error_message = str(exc)[:2000]
-            job.status = "failed"
-            job.error_message = str(exc)[:2000]
-            job.finished_at = datetime.now(timezone.utc)
+            error_message = str(exc)[:2000]
+            await session.rollback()
+            failed_document = await session.scalar(select(Document).where(Document.id == document_id))
+            failed_job = await session.scalar(select(IngestionJob).where(IngestionJob.id == job_id))
+            if failed_document is not None:
+                failed_document.status = "failed"
+                failed_document.error_message = error_message
+            if failed_job is not None:
+                failed_job.status = "failed"
+                failed_job.error_message = error_message
+                failed_job.finished_at = datetime.now(timezone.utc)
             await session.commit()
             raise
 
