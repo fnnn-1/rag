@@ -13,11 +13,12 @@ class RerankedResult:
 
 def _features(text: str) -> set[str]:
     normalized = text.lower().strip()
-    words = set(re.findall(r"[a-z0-9_]+", normalized))
-    cjk = re.findall(r"[\u4e00-\u9fff]", normalized)
-    words.update(cjk)
-    words.update("".join(cjk[index:index + 2]) for index in range(max(0, len(cjk) - 1)))
-    return words
+    features = set(re.findall(r"[a-z0-9_]+", normalized))
+    cjk_sequences = re.findall(r"[\u4e00-\u9fff]+", normalized)
+    for sequence in cjk_sequences:
+        features.update(sequence[index:index + 2] for index in range(max(0, len(sequence) - 1)))
+        features.update(sequence[index:index + 3] for index in range(max(0, len(sequence) - 2)))
+    return {feature for feature in features if feature}
 
 
 def lexical_overlap(query: str, content: str) -> float:
@@ -39,5 +40,17 @@ def rerank_results(query: str, results: list[SearchResult], top_k: int) -> list[
     return sorted(reranked, key=lambda item: item.rerank_score, reverse=True)[:top_k]
 
 
-def has_sufficient_evidence(results: list[RerankedResult], threshold: float = 0.12) -> bool:
+def select_evidence(
+    results: list[RerankedResult],
+    absolute_threshold: float = 0.15,
+    relative_threshold: float = 0.65,
+) -> list[RerankedResult]:
+    if not results:
+        return []
+    strongest_overlap = max(item.lexical_overlap for item in results)
+    threshold = max(absolute_threshold, strongest_overlap * relative_threshold)
+    return [item for item in results if item.lexical_overlap >= threshold]
+
+
+def has_sufficient_evidence(results: list[RerankedResult], threshold: float = 0.15) -> bool:
     return bool(results and max(item.lexical_overlap for item in results) >= threshold)

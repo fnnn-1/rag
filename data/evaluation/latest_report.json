@@ -1,0 +1,811 @@
+{
+  "report_name": "企业级智能知识库 RAG 评测报告",
+  "generated_at": "2026-08-30T13:26:08+00:00",
+  "dataset": {
+    "name": "企业制度知识库评测集",
+    "version": "1.0.0",
+    "question_count": 30
+  },
+  "knowledge_base": {
+    "id": "1300ee50-bd53-4afc-9288-84cbdfc25846",
+    "name": "企业制度演示知识库",
+    "document_count": 6
+  },
+  "metrics": {
+    "question_count": 30,
+    "answerable_count": 24,
+    "unanswerable_count": 6,
+    "retrieval_hit_at_5": 1.0,
+    "retrieval_recall_at_5": 1.0,
+    "retrieval_mrr_at_5": 1.0,
+    "citation_precision": 1.0,
+    "citation_coverage": 1.0,
+    "expected_term_coverage": 1.0,
+    "answerable_grounded_rate": 1.0,
+    "refusal_accuracy": 1.0,
+    "average_latency_ms": 390.8,
+    "category_metrics": {
+      "休假": {
+        "question_count": 4,
+        "hit_at_5": 1
+      },
+      "员工手册": {
+        "question_count": 4,
+        "hit_at_5": 1
+      },
+      "差旅": {
+        "question_count": 4,
+        "hit_at_5": 1
+      },
+      "报销": {
+        "question_count": 4,
+        "hit_at_5": 1
+      },
+      "知识库外": {
+        "question_count": 6,
+        "refusal_accuracy": 1
+      },
+      "考勤": {
+        "question_count": 4,
+        "hit_at_5": 1
+      },
+      "采购": {
+        "question_count": 4,
+        "hit_at_5": 1
+      }
+    }
+  },
+  "records": [
+    {
+      "id": "handbook-01",
+      "category": "员工手册",
+      "question": "新员工的标准试用期是多久？",
+      "answerable": true,
+      "expected_documents": [
+        "01_employee_handbook.md"
+      ],
+      "expected_terms": [
+        "3个月"
+      ],
+      "retrieved_documents": [
+        "01_employee_handbook.md",
+        "03_leave_policy.md",
+        "02_attendance_policy.md",
+        "05_travel_policy.md",
+        "04_expense_policy.md"
+      ],
+      "cited_documents": [
+        "01_employee_handbook.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 915.43,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "handbook-02",
+      "category": "员工手册",
+      "question": "转正总结最晚应在试用期结束前多久提交？",
+      "answerable": true,
+      "expected_documents": [
+        "01_employee_handbook.md"
+      ],
+      "expected_terms": [
+        "10个工作日"
+      ],
+      "retrieved_documents": [
+        "01_employee_handbook.md",
+        "03_leave_policy.md",
+        "02_attendance_policy.md",
+        "04_expense_policy.md",
+        "05_travel_policy.md"
+      ],
+      "cited_documents": [
+        "01_employee_handbook.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 385.53,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "handbook-03",
+      "category": "员工手册",
+      "question": "发现疑似数据泄露后需要多长时间内报告？",
+      "answerable": true,
+      "expected_documents": [
+        "01_employee_handbook.md"
+      ],
+      "expected_terms": [
+        "30分钟"
+      ],
+      "retrieved_documents": [
+        "01_employee_handbook.md",
+        "02_attendance_policy.md",
+        "04_expense_policy.md",
+        "03_leave_policy.md",
+        "05_travel_policy.md"
+      ],
+      "cited_documents": [
+        "01_employee_handbook.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 473.27,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "handbook-04",
+      "category": "员工手册",
+      "question": "公司电脑和门禁卡最晚什么时候归还？",
+      "answerable": true,
+      "expected_documents": [
+        "01_employee_handbook.md"
+      ],
+      "expected_terms": [
+        "最后工作日",
+        "18:00"
+      ],
+      "retrieved_documents": [
+        "01_employee_handbook.md",
+        "02_attendance_policy.md",
+        "03_leave_policy.md",
+        "04_expense_policy.md",
+        "05_travel_policy.md"
+      ],
+      "cited_documents": [
+        "01_employee_handbook.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 376.02,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "attendance-01",
+      "category": "考勤",
+      "question": "公司的标准工作时间是什么？",
+      "answerable": true,
+      "expected_documents": [
+        "02_attendance_policy.md"
+      ],
+      "expected_terms": [
+        "09:00",
+        "18:00"
+      ],
+      "retrieved_documents": [
+        "02_attendance_policy.md",
+        "01_employee_handbook.md",
+        "03_leave_policy.md",
+        "05_travel_policy.md",
+        "04_expense_policy.md"
+      ],
+      "cited_documents": [
+        "02_attendance_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 436.46,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "attendance-02",
+      "category": "考勤",
+      "question": "几点以后打卡会被记为迟到？",
+      "answerable": true,
+      "expected_documents": [
+        "02_attendance_policy.md"
+      ],
+      "expected_terms": [
+        "09:10"
+      ],
+      "retrieved_documents": [
+        "02_attendance_policy.md",
+        "01_employee_handbook.md",
+        "03_leave_policy.md",
+        "04_expense_policy.md",
+        "05_travel_policy.md"
+      ],
+      "cited_documents": [
+        "02_attendance_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 375.06,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "attendance-03",
+      "category": "考勤",
+      "question": "每月迟到多少次需要主管进行考勤沟通？",
+      "answerable": true,
+      "expected_documents": [
+        "02_attendance_policy.md"
+      ],
+      "expected_terms": [
+        "3次"
+      ],
+      "retrieved_documents": [
+        "02_attendance_policy.md",
+        "03_leave_policy.md",
+        "01_employee_handbook.md",
+        "04_expense_policy.md",
+        "05_travel_policy.md"
+      ],
+      "cited_documents": [
+        "02_attendance_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 370.48,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "attendance-04",
+      "category": "考勤",
+      "question": "漏打卡后应在几个工作日内提交补卡申请？",
+      "answerable": true,
+      "expected_documents": [
+        "02_attendance_policy.md"
+      ],
+      "expected_terms": [
+        "2个工作日"
+      ],
+      "retrieved_documents": [
+        "02_attendance_policy.md",
+        "03_leave_policy.md",
+        "01_employee_handbook.md",
+        "04_expense_policy.md",
+        "05_travel_policy.md"
+      ],
+      "cited_documents": [
+        "02_attendance_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 356.84,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "leave-01",
+      "category": "休假",
+      "question": "工作满1年但不满10年的员工有多少天年假？",
+      "answerable": true,
+      "expected_documents": [
+        "03_leave_policy.md"
+      ],
+      "expected_terms": [
+        "5天"
+      ],
+      "retrieved_documents": [
+        "03_leave_policy.md",
+        "01_employee_handbook.md",
+        "02_attendance_policy.md",
+        "05_travel_policy.md",
+        "04_expense_policy.md"
+      ],
+      "cited_documents": [
+        "03_leave_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 348.57,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "leave-02",
+      "category": "休假",
+      "question": "连续休假超过3个工作日需要提前多久申请？",
+      "answerable": true,
+      "expected_documents": [
+        "03_leave_policy.md"
+      ],
+      "expected_terms": [
+        "7个工作日"
+      ],
+      "retrieved_documents": [
+        "03_leave_policy.md",
+        "02_attendance_policy.md",
+        "01_employee_handbook.md",
+        "04_expense_policy.md",
+        "05_travel_policy.md"
+      ],
+      "cited_documents": [
+        "03_leave_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 369.61,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "leave-03",
+      "category": "休假",
+      "question": "病假超过多久需要提供医疗机构证明？",
+      "answerable": true,
+      "expected_documents": [
+        "03_leave_policy.md"
+      ],
+      "expected_terms": [
+        "1个工作日"
+      ],
+      "retrieved_documents": [
+        "03_leave_policy.md",
+        "04_expense_policy.md",
+        "01_employee_handbook.md",
+        "02_attendance_policy.md",
+        "05_travel_policy.md"
+      ],
+      "cited_documents": [
+        "03_leave_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 378.01,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "leave-04",
+      "category": "休假",
+      "question": "突发病假无法提前申请时，当天几点前要通知主管？",
+      "answerable": true,
+      "expected_documents": [
+        "03_leave_policy.md"
+      ],
+      "expected_terms": [
+        "10:00"
+      ],
+      "retrieved_documents": [
+        "03_leave_policy.md",
+        "02_attendance_policy.md",
+        "01_employee_handbook.md",
+        "04_expense_policy.md",
+        "05_travel_policy.md"
+      ],
+      "cited_documents": [
+        "03_leave_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 345.31,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "expense-01",
+      "category": "报销",
+      "question": "费用发生后多少天内应提交报销？",
+      "answerable": true,
+      "expected_documents": [
+        "04_expense_policy.md"
+      ],
+      "expected_terms": [
+        "30个自然日"
+      ],
+      "retrieved_documents": [
+        "04_expense_policy.md",
+        "03_leave_policy.md",
+        "05_travel_policy.md",
+        "02_attendance_policy.md",
+        "01_employee_handbook.md"
+      ],
+      "cited_documents": [
+        "04_expense_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 332.57,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "expense-02",
+      "category": "报销",
+      "question": "上月费用集中报销的截止时间是什么？",
+      "answerable": true,
+      "expected_documents": [
+        "04_expense_policy.md"
+      ],
+      "expected_terms": [
+        "第5个工作日"
+      ],
+      "retrieved_documents": [
+        "04_expense_policy.md",
+        "03_leave_policy.md",
+        "05_travel_policy.md",
+        "02_attendance_policy.md",
+        "01_employee_handbook.md"
+      ],
+      "cited_documents": [
+        "04_expense_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 358.0,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "expense-03",
+      "category": "报销",
+      "question": "单笔费用超过2000元时还需要提供哪些材料？",
+      "answerable": true,
+      "expected_documents": [
+        "04_expense_policy.md"
+      ],
+      "expected_terms": [
+        "合同",
+        "订单",
+        "事前审批"
+      ],
+      "retrieved_documents": [
+        "04_expense_policy.md",
+        "05_travel_policy.md",
+        "06_procurement_policy.md",
+        "01_employee_handbook.md",
+        "03_leave_policy.md"
+      ],
+      "cited_documents": [
+        "04_expense_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 377.76,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "expense-04",
+      "category": "报销",
+      "question": "哪些费用明确不予报销？",
+      "answerable": true,
+      "expected_documents": [
+        "04_expense_policy.md"
+      ],
+      "expected_terms": [
+        "个人消费",
+        "交通违章罚款"
+      ],
+      "retrieved_documents": [
+        "04_expense_policy.md",
+        "05_travel_policy.md",
+        "03_leave_policy.md",
+        "01_employee_handbook.md",
+        "06_procurement_policy.md"
+      ],
+      "cited_documents": [
+        "04_expense_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 420.61,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "travel-01",
+      "category": "差旅",
+      "question": "国内出差乘高铁原则上可以买什么座位？",
+      "answerable": true,
+      "expected_documents": [
+        "05_travel_policy.md"
+      ],
+      "expected_terms": [
+        "二等座"
+      ],
+      "retrieved_documents": [
+        "05_travel_policy.md",
+        "04_expense_policy.md",
+        "03_leave_policy.md",
+        "06_procurement_policy.md",
+        "01_employee_handbook.md"
+      ],
+      "cited_documents": [
+        "05_travel_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 384.53,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "travel-02",
+      "category": "差旅",
+      "question": "上海出差的住宿标准上限是多少？",
+      "answerable": true,
+      "expected_documents": [
+        "05_travel_policy.md"
+      ],
+      "expected_terms": [
+        "600元"
+      ],
+      "retrieved_documents": [
+        "05_travel_policy.md",
+        "04_expense_policy.md",
+        "03_leave_policy.md",
+        "01_employee_handbook.md",
+        "06_procurement_policy.md"
+      ],
+      "cited_documents": [
+        "05_travel_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 383.16,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "travel-03",
+      "category": "差旅",
+      "question": "其他省会城市每晚住宿上限是多少？",
+      "answerable": true,
+      "expected_documents": [
+        "05_travel_policy.md"
+      ],
+      "expected_terms": [
+        "450元"
+      ],
+      "retrieved_documents": [
+        "05_travel_policy.md",
+        "04_expense_policy.md",
+        "03_leave_policy.md",
+        "01_employee_handbook.md",
+        "02_attendance_policy.md"
+      ],
+      "cited_documents": [
+        "05_travel_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 356.95,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "travel-04",
+      "category": "差旅",
+      "question": "国内出差每天的餐费补助是多少？",
+      "answerable": true,
+      "expected_documents": [
+        "05_travel_policy.md"
+      ],
+      "expected_terms": [
+        "100元"
+      ],
+      "retrieved_documents": [
+        "05_travel_policy.md",
+        "04_expense_policy.md",
+        "03_leave_policy.md",
+        "01_employee_handbook.md",
+        "02_attendance_policy.md"
+      ],
+      "cited_documents": [
+        "05_travel_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 335.04,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "procurement-01",
+      "category": "采购",
+      "question": "采购金额不超过5000元由谁审批？",
+      "answerable": true,
+      "expected_documents": [
+        "06_procurement_policy.md"
+      ],
+      "expected_terms": [
+        "部门负责人"
+      ],
+      "retrieved_documents": [
+        "06_procurement_policy.md",
+        "04_expense_policy.md",
+        "05_travel_policy.md",
+        "01_employee_handbook.md",
+        "03_leave_policy.md"
+      ],
+      "cited_documents": [
+        "06_procurement_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 340.46,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "procurement-02",
+      "category": "采购",
+      "question": "采购金额在5000元到50000元之间需要几家供应商报价？",
+      "answerable": true,
+      "expected_documents": [
+        "06_procurement_policy.md"
+      ],
+      "expected_terms": [
+        "3家供应商"
+      ],
+      "retrieved_documents": [
+        "06_procurement_policy.md",
+        "04_expense_policy.md",
+        "05_travel_policy.md",
+        "03_leave_policy.md",
+        "02_attendance_policy.md"
+      ],
+      "cited_documents": [
+        "06_procurement_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 361.52,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "procurement-03",
+      "category": "采购",
+      "question": "超过50000元的采购需要履行什么程序？",
+      "answerable": true,
+      "expected_documents": [
+        "06_procurement_policy.md"
+      ],
+      "expected_terms": [
+        "正式招标",
+        "财务负责人",
+        "总经理"
+      ],
+      "retrieved_documents": [
+        "06_procurement_policy.md",
+        "04_expense_policy.md",
+        "05_travel_policy.md",
+        "01_employee_handbook.md",
+        "03_leave_policy.md"
+      ],
+      "cited_documents": [
+        "06_procurement_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 381.35,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "procurement-04",
+      "category": "采购",
+      "question": "紧急采购应在多久内补齐申请和审批记录？",
+      "answerable": true,
+      "expected_documents": [
+        "06_procurement_policy.md"
+      ],
+      "expected_terms": [
+        "2个工作日"
+      ],
+      "retrieved_documents": [
+        "06_procurement_policy.md",
+        "04_expense_policy.md",
+        "02_attendance_policy.md",
+        "01_employee_handbook.md",
+        "03_leave_policy.md"
+      ],
+      "cited_documents": [
+        "06_procurement_policy.md"
+      ],
+      "grounded": true,
+      "term_coverage": 1.0,
+      "latency_ms": 383.85,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "unknown-01",
+      "category": "知识库外",
+      "question": "公司2026年的股票价格是多少？",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_terms": [],
+      "retrieved_documents": [
+        "05_travel_policy.md",
+        "06_procurement_policy.md",
+        "04_expense_policy.md",
+        "03_leave_policy.md",
+        "01_employee_handbook.md"
+      ],
+      "cited_documents": [],
+      "grounded": false,
+      "term_coverage": 1.0,
+      "latency_ms": 359.46,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "unknown-02",
+      "category": "知识库外",
+      "question": "公司创始人的出生日期是什么？",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_terms": [],
+      "retrieved_documents": [
+        "01_employee_handbook.md",
+        "03_leave_policy.md",
+        "02_attendance_policy.md",
+        "04_expense_policy.md",
+        "05_travel_policy.md"
+      ],
+      "cited_documents": [],
+      "grounded": false,
+      "term_coverage": 1.0,
+      "latency_ms": 324.0,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "unknown-03",
+      "category": "知识库外",
+      "question": "公司食堂今天午餐菜单是什么？",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_terms": [],
+      "retrieved_documents": [
+        "05_travel_policy.md",
+        "02_attendance_policy.md",
+        "01_employee_handbook.md",
+        "03_leave_policy.md",
+        "04_expense_policy.md"
+      ],
+      "cited_documents": [],
+      "grounded": false,
+      "term_coverage": 1.0,
+      "latency_ms": 343.28,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "unknown-04",
+      "category": "知识库外",
+      "question": "下周上海的天气怎么样？",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_terms": [],
+      "retrieved_documents": [
+        "05_travel_policy.md",
+        "03_leave_policy.md",
+        "01_employee_handbook.md",
+        "04_expense_policy.md",
+        "02_attendance_policy.md"
+      ],
+      "cited_documents": [],
+      "grounded": false,
+      "term_coverage": 1.0,
+      "latency_ms": 390.44,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "unknown-05",
+      "category": "知识库外",
+      "question": "公司的年度营收目标是多少亿元？",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_terms": [],
+      "retrieved_documents": [
+        "04_expense_policy.md",
+        "05_travel_policy.md",
+        "03_leave_policy.md",
+        "01_employee_handbook.md",
+        "06_procurement_policy.md"
+      ],
+      "cited_documents": [],
+      "grounded": false,
+      "term_coverage": 1.0,
+      "latency_ms": 380.53,
+      "embedding_provider": "openai-compatible"
+    },
+    {
+      "id": "unknown-06",
+      "category": "知识库外",
+      "question": "员工可以免费领取几台手机？",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_terms": [],
+      "retrieved_documents": [
+        "01_employee_handbook.md",
+        "03_leave_policy.md",
+        "02_attendance_policy.md",
+        "05_travel_policy.md",
+        "04_expense_policy.md"
+      ],
+      "cited_documents": [],
+      "grounded": false,
+      "term_coverage": 1.0,
+      "latency_ms": 379.81,
+      "embedding_provider": "openai-compatible"
+    }
+  ]
+}

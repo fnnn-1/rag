@@ -236,3 +236,28 @@ EMBEDDING_MODEL=Embedding模型名称
 ```
 
 `.env` 不得提交到仓库；配置后需要重启 `api` 和 `worker` 服务。
+## 第六天状态
+
+已完成作品演示界面和 RAG 量化评测体系：
+
+- 重新设计 Streamlit 登录、知识库、文档和聊天界面
+- 支持连续会话、引用展开、Trace ID 与耗时展示
+- 新增 6 份虚构脱敏企业制度演示文档
+- 新增 30 条标准问答评测集
+- 实现自动建库、文档入库和可重复评测脚本
+- 统计 Hit@5、Recall@5、MRR@5、引用准确率、关键词覆盖率与拒答通过率
+- 在 Streamlit 中展示最新评测指标和失败样例
+
+运行完整评测：
+
+```powershell
+docker exec kb-api python scripts/evaluate_rag.py
+```
+
+复用演示知识库重新评测：
+
+```powershell
+docker exec kb-api python scripts/evaluate_rag.py --skip-prepare
+```
+
+2026-08-30 基准结果：Hit@5 100%、Recall@5 100%、MRR@5 1.0000、引用准确率 100%、拒答通过率 100%，平均检索与重排序耗时 390.80 ms。该结果仅针对项目自拟的 30 条演示评测集。

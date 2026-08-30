@@ -1,4 +1,4 @@
-﻿from dataclasses import dataclass
+from dataclasses import dataclass
 from uuid import UUID
 
 from sqlalchemy import func, select
@@ -63,7 +63,10 @@ async def hybrid_search(
     top_k = max(1, min(top_k, 50))
     candidate_limit = max(top_k, settings.retrieval_candidate_k)
     provider = get_embedding_provider()
-    query_vector = await provider.embed_query(query)
+    try:
+        query_vector = await provider.embed_query(query)
+    finally:
+        await provider.close()
     vector_rows = await vector_search(db, knowledge_base_id, query_vector, candidate_limit)
     keyword_rows = await keyword_search(db, knowledge_base_id, query, candidate_limit)
 

@@ -8,6 +8,9 @@ from app.retrieval.hybrid_search import SearchResult
 class LLMProvider:
     name = "base"
 
+    async def close(self) -> None:
+        return None
+
     async def generate(self, question: str, results: list[SearchResult]) -> str:
         raise NotImplementedError
 
@@ -18,9 +21,7 @@ class FallbackLLMProvider(LLMProvider):
     async def generate(self, question: str, results: list[SearchResult]) -> str:
         if not results:
             return "知识库中未找到足够依据，无法准确回答该问题。"
-        excerpts = []
-        for index, result in enumerate(results, start=1):
-            excerpts.append(f"[S{index}] {result.content}")
+        excerpts = [f"[S{index}] {result.content}" for index, result in enumerate(results, start=1)]
         return "根据知识库资料，相关内容如下：\n\n" + "\n\n".join(excerpts)
 
 
@@ -33,6 +34,9 @@ class OpenAICompatibleLLMProvider(LLMProvider):
             base_url=settings.llm_base_url or None,
             timeout=settings.llm_timeout_seconds,
         )
+
+    async def close(self) -> None:
+        await self.client.close()
 
     async def generate(self, question: str, results: list[SearchResult]) -> str:
         response = await self.client.chat.completions.create(

@@ -9,7 +9,7 @@ from app.core.config import settings
 from app.llm.chat import FallbackLLMProvider, get_llm_provider
 from app.models import Conversation, Message, MessageCitation, User
 from app.retrieval.hybrid_search import SearchResult, hybrid_search
-from app.retrieval.reranker import RerankedResult, has_sufficient_evidence, rerank_results
+from app.retrieval.reranker import RerankedResult, has_sufficient_evidence, rerank_results, select_evidence
 
 REFUSAL_ANSWER = "知识库中未找到足够依据，无法准确回答该问题。"
 
@@ -74,7 +74,7 @@ async def answer_question(
         top_k=max(top_k, min(settings.retrieval_candidate_k, 20)),
     )
     reranked = rerank_results(question, candidates, top_k=max(top_k, 5))
-    evidence = [item for item in reranked if item.lexical_overlap >= 0.12]
+    evidence = select_evidence(reranked)
     grounded = has_sufficient_evidence(evidence)
     retrieval_latency_ms = round((perf_counter() - retrieval_start) * 1000)
 
@@ -84,8 +84,11 @@ async def answer_question(
         generation_start = perf_counter()
         provider = get_llm_provider()
         try:
-            answer = await provider.generate(question, selected_results)
-            provider_name = provider.name
+            try:
+                answer = await provider.generate(question, selected_results)
+                provider_name = provider.name
+            finally:
+                await provider.close()
         except Exception:
             fallback = FallbackLLMProvider()
             answer = await fallback.generate(question, selected_results)
