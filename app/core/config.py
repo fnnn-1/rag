@@ -6,6 +6,9 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     app_env: str = "development"
     debug: bool = True
+    log_level: str = "INFO"
+    log_json: bool = True
+    cors_origins: str = "http://localhost:8501"
     secret_key: str = "change-me-in-env"
     access_token_expire_minutes: int = 60
 
@@ -41,6 +44,10 @@ class Settings(BaseSettings):
         case_sensitive=False,
         extra="ignore",
     )
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(',') if origin.strip()]
 
     @property
     def database_url(self) -> str:

@@ -1,263 +1,215 @@
 # 企业级智能知识库问答系统
 
-面向企业内部员工的智能知识库问答系统，支持用户认证、知识库管理，并将逐步加入文档上传、异步解析、向量化、混合检索、RAG 问答和引用来源。
+一个面向企业内部员工的可解释 RAG 知识库问答项目，重点展示 Python 后端、文档处理、混合检索、大模型应用、异步任务、自动评测和 Docker 部署能力。
 
-## 第三天状态
+![系统架构](docs/images/system-architecture.svg)
 
-已完成文档上传和异步处理：
+## 核心能力
 
-- 支持 PDF、DOCX、Markdown 和 TXT
-- 文件大小和扩展名校验
-- 本地上传文件持久化
-- Celery + Redis 后台异步处理
-- 文档解析、文本清洗和分块
-- 文档处理状态查询
-- 文档列表、详情和删除
-- 任务失败原因记录
-- 用户只能访问自己知识库中的文档
-- Streamlit 文档上传和状态展示
+- **账号与权限**：注册、登录、JWT 鉴权，用户级知识库和文档隔离。
+- **文档入库**：支持 PDF、DOCX、Markdown、TXT，使用 Celery + Redis 异步解析。
+- **数据处理**：文本清洗、重叠分块、批量 Embedding、任务状态和失败原因记录。
+- **混合检索**：pgvector HNSW 向量检索 + PostgreSQL GIN 全文检索 + RRF 融合。
+- **证据重排序**：综合词项/字符重叠、向量分数和关键词分数，过滤弱相关来源。
+- **严格 RAG**：只基于知识库回答，返回 `[S1]` 引用，证据不足时明确拒答。
+- **会话持久化**：保存会话、消息、引用、Trace ID、检索与生成耗时。
+- **量化评测**：自动计算 Hit@5、Recall@5、MRR@5、引用准确率和拒答通过率。
+- **可观测性**：结构化日志、请求 ID、健康检查、统一内部错误响应和安全响应头。
+- **容器部署**：FastAPI、Streamlit、PostgreSQL/pgvector、Redis、Celery 一键启动。
 
-第三天文档接口：
+## 技术栈
 
-```text
-POST   /api/v1/knowledge-bases/{knowledge_base_id}/documents
-GET    /api/v1/knowledge-bases/{knowledge_base_id}/documents
-GET    /api/v1/documents/{document_id}
-DELETE /api/v1/documents/{document_id}
-GET    /api/v1/jobs/{job_id}
-```
-
-支持的文件类型：
-
-```text
-.pdf
-.docx
-.md
-.markdown
-.txt
-```
-
-默认单文件大小限制：20 MB。
-## 第二天状态
-
-已完成用户认证和知识库管理：
-
-- 用户注册、登录和 JWT 鉴权
-- 当前用户信息接口
-- 知识库创建、查询、更新和删除
-- 用户资源隔离
-- PostgreSQL 表自动初始化
-- Streamlit 登录和知识库管理页面
-- 认证与权限集成测试
-
-## 第一天状态
-
-已完成项目基础骨架：
-
-- FastAPI API 服务
-- PostgreSQL + pgvector
-- Redis
-- Celery Worker
-- Streamlit 前端占位页
-- Docker Compose 编排
-- 基础环境变量和配置入口
-- `/health` 与 `/api/v1/health` 健康检查
-
-## 前置环境
-
-- Windows 11 / WSL2
-- Docker Desktop
-- Git
+| 层级 | 技术 |
+|---|---|
+| Web UI | Streamlit |
+| API | FastAPI、Pydantic v2 |
+| 数据访问 | SQLAlchemy 2.x、asyncpg |
+| 数据库 | PostgreSQL 16、pgvector |
+| 异步任务 | Celery、Redis |
+| 文档解析 | PyMuPDF、python-docx |
+| 模型接口 | OpenAI-compatible Chat / Embedding API |
+| 检索 | Vector Search、PostgreSQL FTS、RRF |
+| 测试 | pytest、pytest-asyncio、HTTPX |
+| 部署 | Docker Desktop、Docker Compose |
 
 ## 快速启动
 
-首次使用时复制环境变量文件：
+### 1. 进入项目目录
+
+```powershell
+Set-Location "D:\项目\项目5"
+```
+
+### 2. 准备环境变量
+
+首次运行：
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-首次构建应用镜像（Windows 中文路径使用脚本规避 Docker BuildKit 路径兼容问题）：
+不要覆盖已经配置好的 `.env`，并且不要提交真实 API Key。
+
+对话模型和 Embedding 模型可以使用不同的接口与凭证：
+
+```env
+LLM_BASE_URL=
+LLM_API_KEY=
+LLM_MODEL=
+
+EMBEDDING_BASE_URL=
+EMBEDDING_API_KEY=
+EMBEDDING_MODEL=
+EMBEDDING_DIMENSIONS=1024
+```
+
+`EMBEDDING_DIMENSIONS` 必须与模型真实输出维度一致。
+
+### 3. 构建镜像
+
+项目路径包含中文，使用提供的构建脚本：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\build-image.ps1
 ```
 
-启动全部服务：
+### 4. 启动服务
 
 ```powershell
 docker compose up -d
-```
-
-查看状态：
-
-```powershell
 docker compose ps
 ```
 
-停止服务：
+### 5. 访问
 
-```powershell
-docker compose down
+| 服务 | 地址 |
+|---|---|
+| Streamlit | http://localhost:8501 |
+| Swagger | http://localhost:8000/docs |
+| ReDoc | http://localhost:8000/redoc |
+| Liveness | http://localhost:8000/api/v1/health/live |
+| Readiness | http://localhost:8000/api/v1/health/ready |
+
+## RAG 流程
+
+![RAG 流程](docs/images/rag-flow.svg)
+
+```text
+上传文档
+  -> Celery 异步解析
+  -> 文本清洗与分块
+  -> Embedding 与全文索引
+  -> 向量检索 + 全文检索
+  -> RRF 融合
+  -> 重排序与证据门控
+  -> LLM 生成或明确拒答
+  -> 返回引用并保存会话
 ```
 
-第二天和第三天集成测试（容器内执行）：
+## 运行测试
+
+普通测试：
+
+```powershell
+docker exec kb-api pytest -q
+```
+
+包含 PostgreSQL 的全量集成测试：
 
 ```powershell
 docker exec -e RUN_DB_TESTS=1 kb-api pytest -q
 ```
 
-## 服务地址
-
-- API：http://localhost:8000
-- Swagger：http://localhost:8000/docs
-- ReDoc：http://localhost:8000/redoc
-- Streamlit：http://localhost:8501
-
-健康检查：
-
-```powershell
-Invoke-WebRequest http://localhost:8000/health
-Invoke-WebRequest http://localhost:8000/api/v1/health
-```
-
-## 第二天新增接口
+当前验收结果：
 
 ```text
-POST   /api/v1/auth/register
-POST   /api/v1/auth/login
-GET    /api/v1/auth/me
-POST   /api/v1/knowledge-bases
-GET    /api/v1/knowledge-bases
-GET    /api/v1/knowledge-bases/{knowledge_base_id}
-PATCH  /api/v1/knowledge-bases/{knowledge_base_id}
-DELETE /api/v1/knowledge-bases/{knowledge_base_id}
+17 passed
 ```
 
-## 项目结构
+PyMuPDF 可能产生 SWIG 弃用警告，不影响当前功能。
 
-```text
-app/       FastAPI 后端和领域模块
-frontend/  Streamlit 前端
-tests/     自动化测试
-scripts/   开发和评测脚本
-data/      上传文件、处理结果和示例数据
-docs/      架构和项目文档
-```
+## 运行评测
 
-## 开发计划
-
-1. 用户认证和知识库管理
-2. 文档上传和异步解析
-3. Embedding 与 pgvector
-4. 全文检索、混合检索和重排序
-5. 严格基于资料的 RAG 问答
-6. 评测、测试和项目包装
-
-
-
-## 安全说明
-
-- `.env` 只用于本地配置，不提交 API Key。
-- 生产环境必须修改 `SECRET_KEY` 和数据库密码。
-- 示例资料应使用自拟或已脱敏的内容。
-
-## 第四天状态
-
-已完成向量化和混合检索基础能力：
-
-- `document_chunks` 分块表
-- Embedding Provider 适配层
-- OpenAI-compatible Embedding API 支持
-- 无 API Key 时的离线 Hash Embedding fallback
-- pgvector 余弦相似度检索
-- PostgreSQL `tsvector` 全文检索
-- RRF 混合排序
-- HNSW 向量索引和 GIN 全文索引
-- 知识库级数据过滤
-- 检索结果包含文档来源、分块内容和多个得分
-
-检索接口：
-
-```text
-POST /api/v1/knowledge-bases/{knowledge_base_id}/search
-```
-
-请求示例：
-
-```json
-{
-  "query": "hotel costs receipts",
-  "top_k": 5
-}
-```
-
-未配置真实 Embedding API 时，系统会使用 `hash-fallback` 保证本地开发和测试可运行；配置 `LLM_API_KEY` 和 `EMBEDDING_MODEL` 后自动切换为 `openai-compatible`。
-## 第五天状态
-
-已完成完整 RAG 问答链路：
-
-- 会话、消息和引用数据模型
-- Prompt 模板和严格知识库问答规则
-- LLM OpenAI-compatible 调用
-- 无 API Key 时的抽取式离线回答 fallback
-- 基于词项/字符重叠和检索得分的重排序
-- 证据门控和无依据拒答
-- 回答引用文档分块来源
-- 检索、生成和 Trace ID 调试信息
-- Streamlit 问答界面和引用展开
-
-问答接口：
-
-```text
-POST /api/v1/chat/query
-```
-
-当没有足够证据时，接口返回 `grounded=false`，并固定回复：
-
-```text
-知识库中未找到足够依据，无法准确回答该问题。
-```
-
-配置 `LLM_API_KEY` 和 `LLM_MODEL` 后使用云端模型；未配置时使用 `extractive-fallback`，保证本地演示不依赖外部模型。
-
-## 模型凭证配置
-
-对话模型和 Embedding 模型支持使用不同的 API 凭证：
-
-```env
-LLM_BASE_URL=对话模型接口地址
-LLM_API_KEY=对话模型API Key
-LLM_MODEL=对话模型名称
-
-EMBEDDING_BASE_URL=Embedding接口地址（与对话接口相同可留空）
-EMBEDDING_API_KEY=Embedding模型API Key
-EMBEDDING_MODEL=Embedding模型名称
-```
-
-`.env` 不得提交到仓库；配置后需要重启 `api` 和 `worker` 服务。
-## 第六天状态
-
-已完成作品演示界面和 RAG 量化评测体系：
-
-- 重新设计 Streamlit 登录、知识库、文档和聊天界面
-- 支持连续会话、引用展开、Trace ID 与耗时展示
-- 新增 6 份虚构脱敏企业制度演示文档
-- 新增 30 条标准问答评测集
-- 实现自动建库、文档入库和可重复评测脚本
-- 统计 Hit@5、Recall@5、MRR@5、引用准确率、关键词覆盖率与拒答通过率
-- 在 Streamlit 中展示最新评测指标和失败样例
-
-运行完整评测：
+首次执行会重建专用演示知识库并导入 6 份脱敏制度文档：
 
 ```powershell
 docker exec kb-api python scripts/evaluate_rag.py
 ```
 
-复用演示知识库重新评测：
+复用现有演示知识库：
 
 ```powershell
 docker exec kb-api python scripts/evaluate_rag.py --skip-prepare
 ```
 
-2026-08-30 基准结果：Hit@5 100%、Recall@5 100%、MRR@5 1.0000、引用准确率 100%、拒答通过率 100%，平均检索与重排序耗时 390.80 ms。该结果仅针对项目自拟的 30 条演示评测集。
+2026-08-30 自建演示集结果：
+
+| 指标 | 结果 |
+|---|---:|
+| Retrieval Hit@5 | 100.00% |
+| Retrieval Recall@5 | 100.00% |
+| MRR@5 | 1.0000 |
+| 引用准确率 | 100.00% |
+| 引用覆盖率 | 100.00% |
+| 关键答案词覆盖率 | 100.00% |
+| 知识库外问题拒答通过率 | 100.00% |
+| 平均检索与重排序耗时 | 430.58 ms |
+
+> 指标仅代表项目自行编写的 6 份制度文档和 30 条标准问题，不代表所有真实企业数据上的通用准确率。
+
+## 项目结构
+
+```text
+app/
+  api/           FastAPI 路由
+  core/          配置、安全、日志、中间件
+  db/            SQLAlchemy 模型和初始化
+  evaluation/    评测指标
+  llm/           Chat/Embedding 适配层和 Prompt
+  parsers/       文档解析与分块
+  retrieval/     向量、全文、RRF 和重排序
+  services/      RAG 业务编排
+  tasks/         Celery 文档任务
+frontend/        Streamlit 界面
+scripts/         构建、演示数据和评测脚本
+data/seed/       可公开的虚构脱敏制度文档
+data/evaluation/ 标准问题集和最新评测报告
+docs/            架构、部署、API、面试和安全文档
+tests/           单元测试与集成测试
+```
+
+## 文档导航
+
+- [系统架构](docs/architecture.md)
+- [部署说明](docs/deployment.md)
+- [API 使用示例](docs/api-usage.md)
+- [RAG 评测方案](docs/evaluation.md)
+- [安全说明](docs/security.md)
+- [常见问题排查](docs/troubleshooting.md)
+- [项目演示脚本](docs/demo-script.md)
+- [简历项目描述](docs/resume-description.md)
+- [面试讲解与追问](docs/interview-guide.md)
+- [最终验收清单](docs/acceptance-checklist.md)
+
+## 安全提醒
+
+- `.env`、上传文件和真实密钥不会提交到 Git。
+- 不要在截图、日志、README、Issue 或聊天中展示完整 API Key。
+- 如果密钥曾意外暴露，应立即在供应商控制台撤销并重新生成。
+- 生产部署必须使用 HTTPS、强 JWT 密钥、强数据库密码、限流和备份。
+
+## 当前边界
+
+- 扫描版 PDF 暂未接入 OCR。
+- 当前重排序为可解释规则，后续可接入独立 Reranker 模型。
+- 权限目前是用户所有权隔离，尚未实现企业组织、部门角色和 ACL。
+- 文件存储使用 Docker Volume，生产环境建议迁移到对象存储。
+- 当前评测数据为作品集演示数据，真实业务需要持续扩充测试集。
+
+## 停止服务
+
+```powershell
+docker compose down
+```
+
+不要使用 `docker compose down -v`，除非明确要删除数据库和 Redis 数据卷。

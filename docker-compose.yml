@@ -1,4 +1,4 @@
-services:
+﻿services:
   db:
     image: pgvector/pgvector:pg16
     container_name: kb-db
@@ -33,9 +33,10 @@ services:
       retries: 10
 
   api:
-    image: kb-app:day6
+    image: kb-app:day7
     container_name: kb-api
     restart: unless-stopped
+    init: true
     env_file:
       - .env
     environment:
@@ -53,11 +54,18 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   worker:
-    image: kb-app:day6
+    image: kb-app:day7
     container_name: kb-worker
     restart: unless-stopped
+    init: true
     env_file:
       - .env
     environment:
@@ -75,9 +83,10 @@ services:
         condition: service_healthy
 
   frontend:
-    image: kb-app:day6
+    image: kb-app:day7
     container_name: kb-frontend
     restart: unless-stopped
+    init: true
     env_file:
       - .env
     environment:
@@ -88,7 +97,14 @@ services:
     volumes:
       - .:/workspace
     depends_on:
-      - api
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 volumes:
   postgres_data:

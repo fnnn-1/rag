@@ -1,6 +1,6 @@
 {
   "report_name": "企业级智能知识库 RAG 评测报告",
-  "generated_at": "2026-08-30T13:26:08+00:00",
+  "generated_at": "2026-08-30T13:59:11+00:00",
   "dataset": {
     "name": "企业制度知识库评测集",
     "version": "1.0.0",
@@ -23,7 +23,7 @@
     "expected_term_coverage": 1.0,
     "answerable_grounded_rate": 1.0,
     "refusal_accuracy": 1.0,
-    "average_latency_ms": 390.8,
+    "average_latency_ms": 430.58,
     "category_metrics": {
       "休假": {
         "question_count": 4,
@@ -79,7 +79,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 915.43,
+      "latency_ms": 1532.73,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -105,7 +105,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 385.53,
+      "latency_ms": 579.99,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -131,7 +131,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 473.27,
+      "latency_ms": 447.32,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -158,7 +158,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 376.02,
+      "latency_ms": 475.49,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -185,7 +185,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 436.46,
+      "latency_ms": 455.81,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -211,7 +211,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 375.06,
+      "latency_ms": 348.26,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -237,7 +237,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 370.48,
+      "latency_ms": 402.85,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -263,7 +263,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 356.84,
+      "latency_ms": 403.92,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -289,7 +289,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 348.57,
+      "latency_ms": 388.37,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -315,7 +315,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 369.61,
+      "latency_ms": 358.51,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -341,7 +341,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 378.01,
+      "latency_ms": 344.22,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -367,7 +367,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 345.31,
+      "latency_ms": 393.6,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -393,7 +393,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 332.57,
+      "latency_ms": 436.09,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -419,7 +419,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 358.0,
+      "latency_ms": 320.49,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -447,7 +447,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 377.76,
+      "latency_ms": 360.91,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -474,7 +474,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 420.61,
+      "latency_ms": 350.69,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -500,7 +500,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 384.53,
+      "latency_ms": 406.13,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -526,7 +526,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 383.16,
+      "latency_ms": 405.23,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -552,7 +552,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 356.95,
+      "latency_ms": 365.6,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -578,7 +578,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 335.04,
+      "latency_ms": 359.07,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -604,7 +604,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 340.46,
+      "latency_ms": 377.17,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -630,7 +630,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 361.52,
+      "latency_ms": 382.0,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -658,7 +658,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 381.35,
+      "latency_ms": 358.58,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -684,7 +684,7 @@
       ],
       "grounded": true,
       "term_coverage": 1.0,
-      "latency_ms": 383.85,
+      "latency_ms": 372.26,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -704,7 +704,7 @@
       "cited_documents": [],
       "grounded": false,
       "term_coverage": 1.0,
-      "latency_ms": 359.46,
+      "latency_ms": 437.51,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -724,7 +724,7 @@
       "cited_documents": [],
       "grounded": false,
       "term_coverage": 1.0,
-      "latency_ms": 324.0,
+      "latency_ms": 370.43,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -744,7 +744,7 @@
       "cited_documents": [],
       "grounded": false,
       "term_coverage": 1.0,
-      "latency_ms": 343.28,
+      "latency_ms": 385.17,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -764,7 +764,7 @@
       "cited_documents": [],
       "grounded": false,
       "term_coverage": 1.0,
-      "latency_ms": 390.44,
+      "latency_ms": 382.85,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -784,7 +784,7 @@
       "cited_documents": [],
       "grounded": false,
       "term_coverage": 1.0,
-      "latency_ms": 380.53,
+      "latency_ms": 363.88,
       "embedding_provider": "openai-compatible"
     },
     {
@@ -804,7 +804,7 @@
       "cited_documents": [],
       "grounded": false,
       "term_coverage": 1.0,
-      "latency_ms": 379.81,
+      "latency_ms": 352.16,
       "embedding_provider": "openai-compatible"
     }
   ]
