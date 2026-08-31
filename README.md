@@ -213,3 +213,12 @@ docker compose down
 ```
 
 不要使用 `docker compose down -v`，除非明确要删除数据库和 Redis 数据卷。
+## 公开评测集复评
+
+已使用 GitHub 公开 `hyintell/RetrievalQA` 数据集中的 `retrievalqa_gpt4.jsonl` 对当前检索管线进行复评。本次完整使用 250 条问题，结果为：Hit@5 100.00%、Recall@5 56.30%、Precision@5 94.64%、MRR@5 0.9900，平均检索耗时 422.12 ms。该结果只反映公开数据集上下文标题的找回能力，不等价于真实企业业务准确率。
+
+```powershell
+docker exec kb-api python scripts/evaluate_public_retrievalqa.py
+```
+
+详见 [公开评测集复评说明](docs/public-evaluation.md) 和 `data/evaluation/public_retrievalqa_report.md`。

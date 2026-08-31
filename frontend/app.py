@@ -31,6 +31,7 @@ if current_api_url in {"http://localhost:8000", "http://127.0.0.1:8000"} and DEF
 API_BASE_URL = current_api_url.rstrip("/")
 st.session_state["api_base_url"] = API_BASE_URL
 REPORT_PATH = Path("/workspace/data/evaluation/latest_report.json")
+PUBLIC_REPORT_PATH = Path("/workspace/data/evaluation/public_retrievalqa_report.json")
 
 
 def api_request(method: str, path: str, **kwargs):
@@ -253,6 +254,22 @@ def render_evaluation() -> None:
             st.success("本次评测没有失败样例。")
         else:
             st.dataframe(failures, use_container_width=True, hide_index=True)
+
+    if PUBLIC_REPORT_PATH.exists():
+        public_report = json.loads(PUBLIC_REPORT_PATH.read_text(encoding="utf-8"))
+        public_metrics = public_report["metrics"]
+        st.divider()
+        st.markdown("### ?? RetrievalQA ??")
+        st.caption(
+            f"???{public_report['dataset']['repository']} ? "
+            f"???? {public_metrics['question_count']} ?????"
+        )
+        public_cols = st.columns(5)
+        public_cols[0].metric("Hit@5", f"{public_metrics['retrieval_hit_at_5'] * 100:.1f}%")
+        public_cols[1].metric("Recall@5", f"{public_metrics['retrieval_recall_at_5'] * 100:.1f}%")
+        public_cols[2].metric("Precision@5", f"{public_metrics['retrieval_precision_at_5'] * 100:.1f}%")
+        public_cols[3].metric("MRR@5", f"{public_metrics['retrieval_mrr_at_5']:.3f}")
+        public_cols[4].metric("????", f"{public_metrics['average_latency_ms']:.0f} ms")
 
 
 def application() -> None:

@@ -59,8 +59,9 @@ class OpenAIEmbeddingProvider(EmbeddingProvider):
 
     async def embed_documents(self, texts: list[str]) -> list[list[float]]:
         vectors: list[list[float]] = []
-        for start in range(0, len(texts), settings.embedding_batch_size):
-            batch = texts[start:start + settings.embedding_batch_size]
+        batch_size = min(settings.embedding_batch_size, 10)
+        for start in range(0, len(texts), batch_size):
+            batch = texts[start:start + batch_size]
             response = await self.client.embeddings.create(model=settings.embedding_model, input=batch)
             ordered = sorted(response.data, key=lambda item: item.index)
             vectors.extend([item.embedding for item in ordered])
