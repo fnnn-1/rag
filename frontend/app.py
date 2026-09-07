@@ -1,64 +1,71 @@
+from __future__ import annotations
+
 import json
 import os
 from pathlib import Path
 
-import requests
 import streamlit as st
 
+from api_client import ApiClient, ApiConnectionError
+from components.citations import render_citations
+from theme import apply_theme
+
+
 st.set_page_config(page_title="企业智能知识库", page_icon="📚", layout="wide")
+apply_theme()
 
-st.markdown(
-    """
-    <style>
-    .block-container {padding-top: 1.6rem; max-width: 1280px;}
-    [data-testid="stSidebar"] {background: #f6f8fc;}
-    .hero {padding: 1.3rem 1.5rem; border-radius: 18px; color: white;
-           background: linear-gradient(120deg, #173b72, #315fa8 58%, #4d7bc3); margin-bottom: 1rem;}
-    .hero h1 {margin: 0; font-size: 2rem;}
-    .hero p {margin: .45rem 0 0; opacity: .88;}
-    .source-card {border-left: 4px solid #315fa8; background: #f7f9fd; padding: .85rem 1rem;
-                  border-radius: 8px; margin: .5rem 0;}
-    .muted {color: #667085; font-size: .9rem;}
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+REPORT_DIR = PROJECT_ROOT / "data" / "evaluation"
+REPORT_PATH = REPORT_DIR / "latest_report.json"
+PUBLIC_REPORT_PATH = REPORT_DIR / "public_retrievalqa_report.json"
 DEFAULT_API_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
-current_api_url = st.session_state.get("api_base_url", DEFAULT_API_URL)
-if current_api_url in {"http://localhost:8000", "http://127.0.0.1:8000"} and DEFAULT_API_URL != "http://localhost:8000":
-    current_api_url = DEFAULT_API_URL
-API_BASE_URL = current_api_url.rstrip("/")
-st.session_state["api_base_url"] = API_BASE_URL
-REPORT_PATH = Path("/workspace/data/evaluation/latest_report.json")
-PUBLIC_REPORT_PATH = Path("/workspace/data/evaluation/public_retrievalqa_report.json")
+
+
+def get_api_client() -> ApiClient:
+    return ApiClient(
+        base_url=st.session_state.get("api_base_url", DEFAULT_API_URL).rstrip("/"),
+        token=st.session_state.get("access_token"),
+    )
 
 
 def api_request(method: str, path: str, **kwargs):
-    headers = kwargs.pop("headers", {})
-    token = st.session_state.get("access_token")
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
+    """Call the API while keeping UI-facing connection/error handling in one place."""
+
     try:
-        return requests.request(method, f"{API_BASE_URL}{path}", headers=headers, timeout=90, **kwargs)
-    except requests.RequestException as exc:
+        response = get_api_client().request(method, path, **kwargs)
+    except ApiConnectionError as exc:
         st.error(f"无法连接 API：{exc}")
         return None
+
+    if response.status_code == 401 and st.session_state.get("access_token"):
+        st.warning("登录状态已失效，请重新登录。")
+        st.session_state.clear()
+        st.rerun()
+    return response
 
 
 def show_error(response, fallback: str) -> None:
     if response is None:
         return
     try:
-        detail = response.json().get("detail", fallback)
-    except ValueError:
+        body = response.json()
+        detail = body.get("detail", fallback) if isinstance(body, dict) else fallback
+        if isinstance(detail, list):
+            detail = "；".join(str(item.get("msg", item)) for item in detail)
+    except (ValueError, TypeError):
         detail = fallback
-    st.error(detail)
+    st.error(str(detail))
 
 
 def auth_panel() -> None:
-    st.markdown('<div class="hero"><h1>📚 企业智能知识库</h1><p>文档解析 · 混合检索 · RAG 问答 · 引用溯源</p></div>', unsafe_allow_html=True)
-    left, center, right = st.columns([1, 1.25, 1])
+    st.markdown(
+        '<div class="hero"><h1>📚 企业智能知识库</h1>'
+        '<p>文档解析 · 混合检索 · RAG 问答 · 引用溯源</p></div>',
+        unsafe_allow_html=True,
+    )
+
+    _, center, _ = st.columns([1, 1.25, 1])
     with center:
         mode = st.segmented_control("账号操作", ["登录", "注册"], default="登录")
         with st.form("auth_form"):
@@ -66,23 +73,38 @@ def auth_panel() -> None:
             password = st.text_input("密码", type="password", placeholder="至少 8 位")
             display_name = st.text_input("显示名称") if mode == "注册" else None
             submitted = st.form_submit_button(mode, type="primary", use_container_width=True)
+
         if not submitted:
             return
+
         if mode == "注册":
-            response = api_request("POST", "/api/v1/auth/register", json={"email": email, "password": password, "display_name": display_name})
+            response = api_request(
+                "POST",
+                "/api/v1/auth/register",
+                json={
+                    "email": email,
+                    "password": password,
+                    "display_name": display_name,
+                },
+            )
             if response is not None and response.ok:
                 st.success("注册成功，请切换到登录。")
             else:
                 show_error(response, "注册失败")
+            return
+
+        response = api_request(
+            "POST",
+            "/api/v1/auth/login",
+            data={"username": email, "password": password},
+        )
+        if response is not None and response.ok:
+            body = response.json()
+            st.session_state["access_token"] = body["access_token"]
+            st.session_state["current_user"] = body["user"]
+            st.rerun()
         else:
-            response = api_request("POST", "/api/v1/auth/login", data={"username": email, "password": password})
-            if response is not None and response.ok:
-                body = response.json()
-                st.session_state["access_token"] = body["access_token"]
-                st.session_state["current_user"] = body["user"]
-                st.rerun()
-            else:
-                show_error(response, "登录失败")
+            show_error(response, "登录失败")
 
 
 def fetch_knowledge_bases() -> list[dict]:
@@ -101,8 +123,13 @@ def create_knowledge_base_panel() -> None:
             name = st.text_input("名称", placeholder="员工制度知识库")
             description = st.text_area("描述", placeholder="知识库用途说明")
             submitted = st.form_submit_button("创建", type="primary", use_container_width=True)
+
         if submitted:
-            response = api_request("POST", "/api/v1/knowledge-bases", json={"name": name, "description": description or None})
+            response = api_request(
+                "POST",
+                "/api/v1/knowledge-bases",
+                json={"name": name, "description": description or None},
+            )
             if response is not None and response.ok:
                 st.success("创建成功")
                 st.rerun()
@@ -125,25 +152,18 @@ def render_chat(knowledge_base: dict) -> None:
 
     if not history:
         st.info("回答将严格基于已完成处理的文档；没有足够证据时系统会拒答。")
+
     for message in history:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
-            if message.get("citations"):
-                with st.expander(f"引用来源（{len(message['citations'])}）"):
-                    for citation in message["citations"]:
-                        location = f" · 第 {citation['page_number']} 页" if citation.get("page_number") else ""
-                        st.markdown(
-                            f'<div class="source-card"><strong>[S{citation["citation_index"]}] '
-                            f'{citation["document_name"]}</strong>{location}<br><span class="muted">'
-                            f'{citation["content"]}</span></div>',
-                            unsafe_allow_html=True,
-                        )
+            render_citations(message.get("citations", []))
             if message.get("meta"):
                 st.caption(message["meta"])
 
     question = st.chat_input("向当前知识库提问……", key=f"chat-input-{knowledge_base_id}")
     if not question:
         return
+
     history.append({"role": "user", "content": question})
     with st.spinner("正在检索资料并生成回答……"):
         response = api_request(
@@ -156,28 +176,36 @@ def render_chat(knowledge_base: dict) -> None:
                 "top_k": 3,
             },
         )
+
     if response is None or not response.ok:
         history.append({"role": "assistant", "content": "问答请求失败，请检查服务日志。"})
         show_error(response, "问答失败")
         st.rerun()
+
     result = response.json()
     st.session_state[conversation_key] = result["conversation_id"]
     status = "已基于证据" if result["grounded"] else "证据不足，已拒答"
-    history.append({
-        "role": "assistant",
-        "content": result["answer"],
-        "citations": result["citations"],
-        "meta": (
-            f"{status} · {result['llm_provider']} · 检索 {result['retrieval_latency_ms']} ms · "
-            f"生成 {result['generation_latency_ms']} ms · Trace {result['trace_id'][:10]}"
-        ),
-    })
+    trace_id = result.get("trace_id", "")
+    history.append(
+        {
+            "role": "assistant",
+            "content": result["answer"],
+            "citations": result.get("citations", []),
+            "meta": (
+                f"{status} · {result.get('llm_provider', 'unknown')} · "
+                f"检索 {result.get('retrieval_latency_ms', 0)} ms · "
+                f"生成 {result.get('generation_latency_ms', 0)} ms · "
+                f"Trace {trace_id[:10]}"
+            ),
+        }
+    )
     st.rerun()
 
 
 def render_documents(knowledge_base: dict, documents: list[dict]) -> None:
     knowledge_base_id = knowledge_base["id"]
     st.markdown("### 文档管理")
+
     with st.container(border=True):
         uploaded_file = st.file_uploader(
             "上传资料",
@@ -186,14 +214,29 @@ def render_documents(knowledge_base: dict, documents: list[dict]) -> None:
             key=f"upload-{knowledge_base_id}",
         )
         col1, col2 = st.columns([1, 4])
-        if col1.button("开始处理", type="primary", key=f"submit-{knowledge_base_id}", disabled=uploaded_file is None):
+        if col1.button(
+            "开始处理",
+            type="primary",
+            key=f"submit-{knowledge_base_id}",
+            disabled=uploaded_file is None,
+        ):
             response = api_request(
                 "POST",
                 f"/api/v1/knowledge-bases/{knowledge_base_id}/documents",
-                files={"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)},
+                files={
+                    "file": (
+                        uploaded_file.name,
+                        uploaded_file.getvalue(),
+                        uploaded_file.type,
+                    )
+                },
             )
             if response is not None and response.status_code == 202:
-                st.success("文档已进入异步处理队列。")
+                result = response.json()
+                document = result["document"]
+                job = result["job"]
+                st.session_state.setdefault("ingestion_jobs", {})[document["id"]] = job["id"]
+                st.success(f"{document['original_filename']} 已进入异步处理队列。")
                 st.rerun()
             else:
                 show_error(response, "文档上传失败")
@@ -203,19 +246,38 @@ def render_documents(knowledge_base: dict, documents: list[dict]) -> None:
     if not documents:
         st.info("当前知识库还没有文档。")
         return
-    status_map = {"queued": "排队中", "processing": "处理中", "completed": "已完成", "failed": "失败"}
+
+    status_map = {
+        "queued": "排队中",
+        "processing": "处理中",
+        "completed": "已完成",
+        "failed": "失败",
+    }
+    job_map = st.session_state.get("ingestion_jobs", {})
+
     for document in documents:
         with st.container(border=True):
             cols = st.columns([5, 1.3, 1.2, 1])
             cols[0].markdown(f"**{document['original_filename']}**")
-            cols[0].caption(f"{document['file_type'].upper()} · {document['file_size'] / 1024:.1f} KB")
+            cols[0].caption(
+                f"{document['file_type'].upper()} · "
+                f"{document['file_size'] / 1024:.1f} KB"
+            )
             cols[1].write(status_map.get(document["status"], document["status"]))
             cols[2].write(f"{document['chunk_count']} 个分块")
-            if cols[3].button("删除", key=f"delete-doc-{document['id']}", use_container_width=True):
+            if cols[3].button(
+                "删除",
+                key=f"delete-doc-{document['id']}",
+                use_container_width=True,
+            ):
                 response = api_request("DELETE", f"/api/v1/documents/{document['id']}")
                 if response is not None and response.status_code == 204:
+                    job_map.pop(document["id"], None)
                     st.rerun()
                 show_error(response, "删除失败")
+
+            if document.get("status") in {"queued", "processing"} and document["id"] in job_map:
+                st.caption(f"处理任务：{job_map[document['id']]}")
             if document.get("error_message"):
                 st.error(document["error_message"])
 
@@ -225,6 +287,7 @@ def render_evaluation() -> None:
     if not REPORT_PATH.exists():
         st.info("尚未生成评测报告。请在项目目录执行：docker exec kb-api python scripts/evaluate_rag.py")
         return
+
     report = json.loads(REPORT_PATH.read_text(encoding="utf-8"))
     metrics = report["metrics"]
     row1 = st.columns(4)
@@ -242,12 +305,23 @@ def render_evaluation() -> None:
     category_rows = []
     for name, values in metrics["category_metrics"].items():
         score = values.get("hit_at_5", values.get("refusal_accuracy", 0))
-        category_rows.append({"分类": name, "问题数": values["question_count"], "得分": f"{score * 100:.1f}%"})
+        category_rows.append(
+            {
+                "分类": name,
+                "问题数": values["question_count"],
+                "得分": f"{score * 100:.1f}%",
+            }
+        )
     st.dataframe(category_rows, use_container_width=True, hide_index=True)
+
     with st.expander("查看失败样例"):
         failures = [
-            record for record in report["records"]
-            if (record["answerable"] and not set(record["expected_documents"]) & set(record["retrieved_documents"][:5]))
+            record
+            for record in report["records"]
+            if (
+                record["answerable"]
+                and not set(record["expected_documents"]) & set(record["retrieved_documents"][:5])
+            )
             or (not record["answerable"] and record["grounded"])
         ]
         if not failures:
@@ -259,17 +333,17 @@ def render_evaluation() -> None:
         public_report = json.loads(PUBLIC_REPORT_PATH.read_text(encoding="utf-8"))
         public_metrics = public_report["metrics"]
         st.divider()
-        st.markdown("### ?? RetrievalQA ??")
+        st.markdown("### RetrievalQA 公开集复评")
         st.caption(
-            f"???{public_report['dataset']['repository']} ? "
-            f"???? {public_metrics['question_count']} ?????"
+            f"数据集：{public_report['dataset']['repository']} · "
+            f"问题数：{public_metrics['question_count']} 条"
         )
         public_cols = st.columns(5)
         public_cols[0].metric("Hit@5", f"{public_metrics['retrieval_hit_at_5'] * 100:.1f}%")
         public_cols[1].metric("Recall@5", f"{public_metrics['retrieval_recall_at_5'] * 100:.1f}%")
         public_cols[2].metric("Precision@5", f"{public_metrics['retrieval_precision_at_5'] * 100:.1f}%")
         public_cols[3].metric("MRR@5", f"{public_metrics['retrieval_mrr_at_5']:.3f}")
-        public_cols[4].metric("????", f"{public_metrics['average_latency_ms']:.0f} ms")
+        public_cols[4].metric("平均耗时", f"{public_metrics['average_latency_ms']:.0f} ms")
 
 
 def application() -> None:
@@ -278,19 +352,30 @@ def application() -> None:
     st.sidebar.caption(user.get("display_name") or user.get("email", ""))
     create_knowledge_base_panel()
     st.sidebar.divider()
+    st.sidebar.caption(f"API：{st.session_state.get('api_base_url', DEFAULT_API_URL)}")
+
     if st.sidebar.button("退出登录", use_container_width=True):
         st.session_state.clear()
         st.rerun()
 
     knowledge_bases = fetch_knowledge_bases()
-    st.markdown('<div class="hero"><h1>企业知识中心</h1><p>集中管理企业资料，并通过可追溯的 RAG 问答快速获得答案。</p></div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="hero"><h1>企业知识中心</h1>'
+        '<p>集中管理企业资料，并通过可追溯的 RAG 问答快速获得答案。</p></div>',
+        unsafe_allow_html=True,
+    )
     if not knowledge_bases:
         st.info("请从左侧创建第一个知识库。")
         return
 
-    selected_name = st.selectbox("当前知识库", [item["name"] for item in knowledge_bases])
-    knowledge_base = next(item for item in knowledge_bases if item["name"] == selected_name)
-    documents = fetch_documents(knowledge_base["id"])
+    knowledge_base_by_id = {item["id"]: item for item in knowledge_bases}
+    selected_id = st.selectbox(
+        "当前知识库",
+        options=list(knowledge_base_by_id),
+        format_func=lambda item_id: knowledge_base_by_id[item_id]["name"],
+    )
+    knowledge_base = knowledge_base_by_id[selected_id]
+    documents = fetch_documents(selected_id)
     completed = sum(document["status"] == "completed" for document in documents)
     metrics = st.columns(4)
     metrics[0].metric("知识库", len(knowledge_bases))
@@ -298,7 +383,9 @@ def application() -> None:
     metrics[2].metric("已完成", completed)
     metrics[3].metric("可检索分块", sum(document["chunk_count"] for document in documents))
 
-    chat_tab, docs_tab, settings_tab, evaluation_tab = st.tabs(["💬 智能问答", "📄 文档管理", "⚙️ 知识库设置", "📊 评测报告"])
+    chat_tab, docs_tab, settings_tab, evaluation_tab = st.tabs(
+        ["💬 智能问答", "📄 文档管理", "⚙️ 知识库设置", "📊 评测报告"]
+    )
     with chat_tab:
         render_chat(knowledge_base)
     with docs_tab:
