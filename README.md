@@ -142,7 +142,7 @@ docker exec kb-api python scripts/evaluate_rag.py
 docker exec kb-api python scripts/evaluate_rag.py --skip-prepare
 ```
 
-2026-08-30 自建演示集结果：
+自建演示集结果：
 
 | 指标 | 结果 |
 |---|---:|
