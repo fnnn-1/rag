@@ -1,0 +1,16 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="520" viewBox="0 0 1280 520">
+  <defs><linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#173b72"/><stop offset="1" stop-color="#4d7bc3"/></linearGradient><marker id="a" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#718096"/></marker><filter id="s"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-opacity="0.12"/></filter><style>.t{font:700 28px 'Microsoft YaHei',sans-serif;fill:#173b72}.w{font:700 17px 'Microsoft YaHei',sans-serif;fill:#fff}.d{font:14px 'Microsoft YaHei',sans-serif;fill:#dce8fb}.k{font:700 17px 'Microsoft YaHei',sans-serif;fill:#263b5a}.m{font:13px 'Microsoft YaHei',sans-serif;fill:#64748b}.l{stroke:#718096;stroke-width:2.4;marker-end:url(#a)}</style></defs>
+  <rect width="1280" height="520" fill="#f7f9fc"/><text x="640" y="48" text-anchor="middle" class="t">RAG 问答与证据门控流程</text>
+  <g filter="url(#s)">
+    <rect x="35" y="150" width="150" height="105" rx="16" fill="url(#p)"/><text x="110" y="190" text-anchor="middle" class="w">用户问题</text><text x="110" y="220" text-anchor="middle" class="d">知识库范围限定</text>
+    <rect x="230" y="120" width="175" height="165" rx="16" fill="#fff"/><text x="317" y="160" text-anchor="middle" class="k">双路召回</text><text x="317" y="195" text-anchor="middle" class="m">pgvector 语义检索</text><text x="317" y="220" text-anchor="middle" class="m">PostgreSQL 全文检索</text><text x="317" y="245" text-anchor="middle" class="m">Top 20 候选</text>
+    <rect x="450" y="150" width="155" height="105" rx="16" fill="url(#p)"/><text x="527" y="190" text-anchor="middle" class="w">RRF 融合</text><text x="527" y="220" text-anchor="middle" class="d">统一候选排名</text>
+    <rect x="650" y="120" width="175" height="165" rx="16" fill="#fff"/><text x="737" y="160" text-anchor="middle" class="k">重排序</text><text x="737" y="195" text-anchor="middle" class="m">词项/字符重叠</text><text x="737" y="220" text-anchor="middle" class="m">向量与关键词得分</text><text x="737" y="245" text-anchor="middle" class="m">动态相对阈值</text>
+    <rect x="870" y="140" width="165" height="125" rx="16" fill="url(#p)"/><text x="952" y="185" text-anchor="middle" class="w">证据门控</text><text x="952" y="215" text-anchor="middle" class="d">证据是否充分？</text>
+    <rect x="1090" y="80" width="155" height="115" rx="16" fill="#fff"/><text x="1167" y="122" text-anchor="middle" class="k">生成回答</text><text x="1167" y="150" text-anchor="middle" class="m">严格 Prompt</text><text x="1167" y="173" text-anchor="middle" class="m">[S1] 引用来源</text>
+    <rect x="1090" y="305" width="155" height="105" rx="16" fill="#fff"/><text x="1167" y="347" text-anchor="middle" class="k">明确拒答</text><text x="1167" y="377" text-anchor="middle" class="m">grounded=false</text>
+  </g>
+  <path d="M185 202 H230" class="l"/><path d="M405 202 H450" class="l"/><path d="M605 202 H650" class="l"/><path d="M825 202 H870" class="l"/><path d="M1035 180 C1060 150 1070 138 1090 138" class="l"/><path d="M1035 225 C1065 280 1070 345 1090 355" class="l"/>
+  <text x="1054" y="135" class="m">充分</text><text x="1048" y="298" class="m">不足</text>
+  <text x="640" y="472" text-anchor="middle" class="m">输出同时保存会话、消息、引用、Trace ID 与检索/生成耗时</text>
+</svg>
